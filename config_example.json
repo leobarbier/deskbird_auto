@@ -1,0 +1,18 @@
+{
+    "credentials": {
+        "email": "ENTER_EKIMETRICS_EMAIL_HERE",
+        "password": "ENTER_PASSWORD_HERE",
+        "app_key": "AIzaSyCJG2vthfqCzIEfbY343MABk46DAuvncRQ"
+    },
+    "workspace_id": "11329", 
+    "favorite_seats": {
+        "6.19A": {
+            "resource_id": "116378",
+            "zone_item_id": 731089
+        },
+        "6.17L": {
+            "resource_id": "116377",
+            "zone_item_id": 731088
+        }
+    }
+}
