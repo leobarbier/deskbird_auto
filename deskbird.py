@@ -159,7 +159,6 @@ def get_next_occurrence(target_weekday, max_days=6):
     next_date = today + timedelta(days=days_ahead)
     return next_date.strftime('%Y-%m-%d')
 
-
 def main():
     try:
         # Load configuration
