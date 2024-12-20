@@ -14,5 +14,6 @@
             "resource_id": "116377",
             "zone_item_id": 731088
         }
-    }
+    },
+    "target_days": ["Mon", "Tue", "Wed", "Thu", "Fri"]
 }

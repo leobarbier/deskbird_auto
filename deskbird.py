@@ -137,12 +137,35 @@ def check_in_booking(bearer_token, booking_id, zone_item_id):
     
     return response.json()
 
+def get_next_occurrence(target_weekday, max_days=6):
+    """Get the date of the next occurrence of a given weekday within max_days from now.
+    target_weekday: int (0=Monday, ..., 6=Sunday)
+    Returns: date string in YYYY-MM-DD format or None if not found within max_days.
+    """
+    today = datetime.now().date()
+    today_weekday = today.weekday() # Monday=0, Tuesday=1, etc.
+    
+    # Calculate how many days until next target_weekday
+    if target_weekday <= today_weekday:
+        days_ahead = target_weekday + 7 - today_weekday
+    else:
+        days_ahead = target_weekday - today_weekday
+
+    # If days_ahead is 0, it means it's today - we want a future occurrence, not today.
+    # Also ensure days_ahead <= max_days
+    if days_ahead == 0 or days_ahead > max_days:
+        return None
+
+    next_date = today + timedelta(days=days_ahead)
+    return next_date.strftime('%Y-%m-%d')
+
+
 def main():
     try:
         # Load configuration
         config = load_config('config.json')
-        target_date = (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
-    
+        # target_date = (datetime.now() + timedelta(days=6)).strftime('%Y-%m-%d')
+        
         # Authenticate
         bearer_token = authenticate(
             config['credentials']['email'],
@@ -150,21 +173,42 @@ def main():
             config['credentials']['app_key']
         )
 
-        # Book seat
-        for seat in config['favorite_seats']: # We loop through all available seats in order 
-            s = config['favorite_seats'][seat]
-            result = book_seat(
-                bearer_token,
-                config['favorite_seats'][seat], # seat info
-                target_date,
-                config['workspace_id']
-            )
-            if result['successfulBookings'] == []:
-                print(f'Booking {seat} has failed for {target_date}, moving on to the next favoured seat')
-            else: 
-                print(f"Successfully booked seat {seat} for {target_date}")
-                # print("Booking details:", json.dumps(result, indent=2))
-                break # we don't try to book further seats
+        weekdays_map = {
+            "Mon": 0,
+            "Tue": 1,
+            "Wed": 2,
+            "Thu": 3,
+            "Fri": 4,
+            "Sat": 5,
+            "Sun": 6
+        }
+        target_days = config.get('target_days', [])
+        
+        for day_str in target_days:
+            if day_str not in weekdays_map:
+                print(f"Unknown day '{day_str}' in target_days.")
+                continue
+
+            target_wd = weekdays_map[day_str]
+            target_date = get_next_occurrence(target_wd, max_days=6)
+            if target_date is None:
+                print(f"No suitable upcoming {day_str} within 6 days found. Skipping.")
+                continue
+
+            # Book seat
+            for seat in config['favorite_seats']: # We loop through all available seats in order 
+                result = book_seat(
+                    bearer_token,
+                    config['favorite_seats'][seat], # seat info
+                    target_date,
+                    config['workspace_id']
+                )
+                if result['successfulBookings'] == []:
+                    print(f'Booking {seat} has failed for {target_date}, moving on to the next favoured seat')
+                else: 
+                    print(f"Successfully booked seat {seat} for {target_date}")
+                    # print("Booking details:", json.dumps(result, indent=2))
+                    break # we don't try to book further seats
 
         # Get user's bookings
         bookings = get_user_bookings(bearer_token)
