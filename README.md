@@ -21,7 +21,7 @@ Create a `config.json` file in the same directory as the script. It should conta
 - `workspace_id`: The ID of the workspace you want to book
 - `favorite_seats`: A dictionary of seat names, each with a `resource_id` and `zone_item_id`.
 - `target_days`: List of days that you want the script to reserve. Possible values: ["Mon", "Tue", "Wed", "Thu", "Fri"]. When you are away for some time or want to cut off the script, simply remove days from target_days. 
-
+ 
 The script will try each favorite seat in order until one is successfully booked.
 
 ## Running the Script
