@@ -15,8 +15,8 @@ This Python script automates seat bookings on Deskbird and checks you in for tod
 ## Configuration
 
 Create a `config.json` file in the same directory as the script. It should contain:
-- `credentials.email`: Your Ekimetrics (Deskbird) account email
-- `credentials.password`: Your Ekimetrics (Deskbird) account password
+- `credentials.email`: Your Deskbird account email
+- `credentials.password`: Your Deskbird account password
 - `credentials.app_key`: The provided Deskbird API key
 - `workspace_id`: The ID of the workspace you want to book
 - `favorite_seats`: A dictionary of seat names, each with a `resource_id` and `zone_item_id`.
