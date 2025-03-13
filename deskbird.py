@@ -1,6 +1,7 @@
 import requests
 import json
 from datetime import datetime, timedelta
+import time
 
 def load_config(config_path='config.json'):
     """Load configuration from JSON file."""
@@ -137,7 +138,7 @@ def check_in_booking(bearer_token, booking_id, zone_item_id):
     
     return response.json()
 
-def get_next_occurrence(target_weekday, max_days=6):
+def get_next_occurrence(target_weekday, max_days=10):
     """Get the date of the next occurrence of a given weekday within max_days from now.
     target_weekday: int (0=Monday, ..., 6=Sunday)
     Returns: date string in YYYY-MM-DD format or None if not found within max_days.
@@ -158,6 +159,24 @@ def get_next_occurrence(target_weekday, max_days=6):
 
     next_date = today + timedelta(days=days_ahead)
     return next_date.strftime('%Y-%m-%d')
+
+def get_upcoming_occurrences(target_weekday, max_days=10):
+    """Get all occurrences of a given weekday within max_days from today.
+    
+    target_weekday: int (0=Monday, ..., 6=Sunday)
+    max_days: int (how far to look ahead)
+    
+    Returns: List of date strings in YYYY-MM-DD format.
+    """
+    today = datetime.now().date()
+    occurrences = []
+
+    for days_ahead in range(1, max_days + 1):  # Start from tomorrow
+        next_date = today + timedelta(days=days_ahead)
+        if next_date.weekday() == target_weekday:
+            occurrences.append(next_date.strftime('%Y-%m-%d'))
+
+    return occurrences  # List of all matching dates within range
 
 def main():
     try:
@@ -189,25 +208,34 @@ def main():
                 continue
 
             target_wd = weekdays_map[day_str]
-            target_date = get_next_occurrence(target_wd, max_days=6)
+            
+
+            """
+            target_date = get_next_occurrence(target_wd, max_days=11)
             if target_date is None:
                 print(f"No suitable upcoming {day_str} within 6 days found. Skipping.")
                 continue
-
-            # Book seat
-            for seat in config['favorite_seats']: # We loop through all available seats in order 
-                result = book_seat(
-                    bearer_token,
-                    config['favorite_seats'][seat], # seat info
-                    target_date,
-                    config['workspace_id']
-                )
-                if result['successfulBookings'] == []:
-                    print(f'Booking {seat} has failed for {target_date}, moving on to the next favoured seat')
-                else: 
-                    print(f"Successfully booked seat {seat} for {target_date}")
-                    # print("Booking details:", json.dumps(result, indent=2))
-                    break # we don't try to book further seats
+            """
+            target_dates = get_upcoming_occurrences(target_wd, max_days=10)
+            if not target_dates:
+                print(f"No suitable upcoming {day_str} within 11 days found. Skipping.")
+                continue
+            for target_date in target_dates:
+                # Book seat
+                for seat in config['favorite_seats']: # We loop through all available seats in order 
+                    result = book_seat(
+                        bearer_token,
+                        config['favorite_seats'][seat], # seat info
+                        target_date,
+                        config['workspace_id']
+                    )
+                    if result['successfulBookings'] == []:
+                        print(f'Booking {seat} has failed for {target_date}, moving on to the next favoured seat')
+                        time.sleep(0.2)
+                    else: 
+                        print(f"Successfully booked seat {seat} for {target_date}")
+                        # print("Booking details:", json.dumps(result, indent=2))
+                        break # we don't try to book further seats
 
         # Get user's bookings
         bookings = get_user_bookings(bearer_token)
