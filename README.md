@@ -35,9 +35,16 @@ Examples that runs at 00:00, 03:00, 06:00, 09:00 every day :
 ```bash
 crontab -e
 
-0 0,3,6,9 * * * /usr/bin/python3 C:\Users\LéoBARBIER\Documents\deskbird\deskbird.py >> /path/to/deskbird_log.txt 2>&1
+0 0,3,6,9 * * * /usr/bin/python3 /path/to/deskbird/deskbird.py >> /path/to/deskbird_log.txt 2>&1
 ```
 
+or 
+
+```bash
+crontab -e
+
+0 0,3,6,9 * * * python3 /path/to/deskbird.py >> /path/to/deskbird_log.txt 2>&1
+```
 
 ## Fetching resource_id and zone_item_id
 To find the resource_id and zone_item_id for your favorite seats:
